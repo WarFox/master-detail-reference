@@ -2,7 +2,7 @@ import { Dialog } from '@base-ui/react/dialog';
 import { Toast } from '@base-ui/react/toast';
 import { Tooltip } from '@base-ui/react/tooltip';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
-import { LayoutDashboard, Layers, Settings, X } from 'lucide-react';
+import { LayoutDashboard, Layers, Settings, Users, X } from 'lucide-react';
 import { IconTooltip } from '../components/IconTooltip';
 import { NotificationsPopover } from '../components/NotificationsPopover';
 
@@ -34,6 +34,13 @@ export function RootLayout() {
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white aria-[current=true]:bg-blue-600 aria-[current=true]:text-white"
             >
               <Layers className="h-4 w-4" /> Work Items
+            </Link>
+            <Link
+              to="/customers"
+              aria-current={pathname.startsWith('/customers') ? 'true' : undefined}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white aria-[current=true]:bg-blue-600 aria-[current=true]:text-white"
+            >
+              <Users className="h-4 w-4" /> Customers
             </Link>
           </nav>
 
