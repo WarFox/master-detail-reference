@@ -7,19 +7,19 @@ Two routes, wired end to end: an **items index page** for browsing/triage, and a
 ## What it shows
 
 - **Sidebar** — persistent primary navigation (`src/routes/RootLayout.tsx`)
-- **Items index** (`/`) — a real `<table>` of all records; click a row to open its detail view (`src/routes/ItemsIndexRoute.tsx`)
+- **Items index** (`/items`, with `/` redirecting to it) — a real `<table>` of all records; click a row to open its detail view (`src/routes/ItemsIndexRoute.tsx`)
 - **Master list** (`/items/:id`) — a virtualized, searchable `<nav>`/`<ul>` of links (`aria-current="page"` marks the open item), not a repurposed tab widget (`src/routes/ItemDetailRoute.tsx`)
 - **Detail view** — record detail with a contextual action rail (`aside`); detail scroll resets on navigation, master-list scroll position is preserved
 - **Toolbar** — search input with `⌘K`/`Ctrl+K` focus hotkey, plus a Base UI `Popover` for notifications
 - **Delete flow** — Base UI `Dialog` confirmation, then a Base UI `Toast` (no blocking `alert()`), redirecting back to the index
-- **Async data** — TanStack Query with a simulated fetch delay and loading state
+- **Async data** — TanStack Query, prefetched via route `loader`s (`queryClient.ensureQueryData`) so both routes render with data already in cache, and `preload="intent"` on row links does real hover-prefetching
 
 The record shape lives in `src/mockData.ts` (`WorkItem`); data is mocked, no backend.
 
 ## Stack
 
 - [React 19](https://react.dev) + TypeScript
-- [TanStack Router](https://tanstack.com/router) — `/` index and `/items/:id` detail routes
+- [TanStack Router](https://tanstack.com/router) — `/items` index and `/items/:id` detail routes, with data-loading `loader`s
 - [TanStack Virtual](https://tanstack.com/virtual) — master-list row virtualization
 - [Base UI](https://base-ui.com) — unstyled accessible primitives (`Dialog`, `Popover`, `Toast`)
 - [TanStack Query](https://tanstack.com/query) — async data fetching
@@ -52,12 +52,12 @@ src/
   router.tsx                    # route tree + router instance
   routes/
     RootLayout.tsx               # sidebar + top bar + toast viewport + <Outlet />
-    ItemsIndexRoute.tsx          # "/" — table of items
+    ItemsIndexRoute.tsx          # "/items" — table of items
     ItemDetailRoute.tsx          # "/items/:id" — master list + detail + context rail
   components/
     NotificationsPopover.tsx     # Base UI Popover-backed notification bell
   hooks/
-    useWorkItems.ts              # shared TanStack Query hook for the mock item list
+    useWorkItems.ts              # shared query options + hook for the mock item list, used by both components and route loaders
   mockData.ts                    # WorkItem type + sample records
   main.tsx                       # QueryClientProvider + Toast.Provider + RouterProvider
 ```
