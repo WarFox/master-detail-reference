@@ -274,6 +274,59 @@ export default function App() {
               <button type="button" className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-50">
                 Assign Ticket
               </button>
+
+              {/* DESTRUCTIVE ACTION COMPONENT TREE */}
+              <Dialog.Root>
+                {/* Trigger button styled as a secondary destructive action */}
+                <Dialog.Trigger render={
+                  <button type="button" className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 shadow-xs transition-colors hover:bg-red-50 cursor-pointer">
+                    Delete Item
+                  </button>
+                } />
+
+                <Dialog.Portal>
+                  {/* 1. Backdrop overlay covering the full workspace */}
+                  <Dialog.Backdrop className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs transition-opacity duration-200" />
+
+                  {/* 2. Traditional centered alert dialog window frame */}
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <Dialog.Popup
+                      className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 ease-out"
+                      render={<section aria-labelledby="delete-dialog-title" />}
+                    >
+                      {/* Header / Title block inside the modal */}
+                      <header className="mb-4">
+                        <Dialog.Title id="delete-dialog-title" className="text-base font-bold text-slate-900">
+                          Confirm Deletion
+                        </Dialog.Title>
+                        <Dialog.Description className="mt-1 text-xs text-slate-500">
+                          Are you sure you want to delete <span className="font-semibold text-slate-700">"{activeItem?.title}"</span>? This action is permanent and cannot be undone.
+                        </Dialog.Description>
+                      </header>
+
+                      {/* Action buttons pinned horizontally at the bottom */}
+                      <footer className="mt-6 flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
+                        <Dialog.Close render={
+                          <button type="button" className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+                            Cancel
+                          </button>
+                        } />
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            alert(`Item ${activeItem?.id} deleted.`);
+                            // Trigger your React Query data mutation logic here
+                          }}
+                          className="rounded-md bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-xs hover:bg-red-700 cursor-pointer"
+                        >
+                          Delete Permanently
+                        </button>
+                      </footer>
+                    </Dialog.Popup>
+                  </div>
+                </Dialog.Portal>
+              </Dialog.Root>
             </section>
 
             <section className="space-y-2">
