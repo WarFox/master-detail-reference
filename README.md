@@ -45,6 +45,24 @@ Then open the printed local URL.
 | `npm run preview` | Preview the production build  |
 | `npm run lint`    | Lint with Oxlint              |
 
+## Porting this to another stack
+
+If you're using this as a reference for a rewrite in a different framework (e.g. a ClojureScript/UIx app), the parts worth copying and the parts that are just implementation detail are different things:
+
+**Copy this — it's the actual reference:**
+- The four-column composition: `aside` (primary nav) → `main` > `section` (master list) + `article` (detail) + `aside` (context rail)
+- Landmark structure: every `nav`/`aside`/`search` is labeled (`aria-label` or `aria-labelledby`), so a screen reader's landmark list is meaningful
+- Real semantic elements over ARIA-widget stand-ins: an actual `<table>` for tabular data, an actual `<ul>`/`<li>` list of links for the master list — not a repurposed tab/listbox widget wearing the wrong role
+- Heading hierarchy: one `h1` per page, sectioning content (`aside`, each `section`) gets its own heading before any subheadings, even if visually hidden (`sr-only`)
+- The breadcrumb pattern (`nav[aria-label="Breadcrumb"] > ol`, `aria-current="page"` on the non-linked current crumb) and the `aria-current` distinction between a section-level nav link (`"true"`) and the one row that's the actual current record (`"page"`)
+- Dialog/popover/toast accessible naming: the element's accessible name must match what's visually shown as the title — don't set a manual `aria-label` on a dialog that also has a visible heading, let the heading be the name
+- Detail-pane vs. master-list scroll behavior on navigation (detail resets to top, list position is preserved) and where focus goes after a client-side navigation (e.g. back to the page heading after the delete-confirm redirect)
+
+**Don't chase a literal equivalent of — these are just how this happens to be wired in React:**
+- TanStack Router's specific route/loader API — the *pattern* worth keeping (prefetch data before the route renders, so a route never flashes empty/not-found state) matters more than the API shape. Since the uix app already uses tanstack-query, this pattern transfers directly, just via whatever routing library it uses.
+- Base UI's `render`-prop composition (nesting `Tooltip.Trigger` around `Dialog.Trigger` etc.) — a UIx equivalent will have its own way of composing behaviors onto one element; what matters is that the composed result still has correct ARIA roles/attributes, not that the composition mechanism looks the same.
+- `@tanstack/react-virtual`'s hook API — the underlying idea (only mount DOM nodes for visible rows, measure real row heights rather than guessing) is worth reproducing if the master list can grow large; the specific React hook isn't.
+
 ## Layout
 
 ```
