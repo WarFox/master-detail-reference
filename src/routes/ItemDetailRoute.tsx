@@ -11,6 +11,7 @@ import {
   Search,
   SlidersHorizontal,
 } from 'lucide-react';
+import { IconTooltip } from '../components/IconTooltip';
 import { useWorkItems } from '../hooks/useWorkItems';
 
 const itemRoute = getRouteApi('/items/$id');
@@ -94,9 +95,11 @@ export function ItemDetailRoute() {
             </form>
           </search>
 
-          <button type="button" aria-label="Filters" className="rounded-md border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 transition-colors">
-            <SlidersHorizontal className="h-4 w-4" />
-          </button>
+          <IconTooltip label="Filters">
+            <button type="button" aria-label="Filters" className="rounded-md border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 transition-colors">
+              <SlidersHorizontal className="h-4 w-4" />
+            </button>
+          </IconTooltip>
         </header>
 
         <nav aria-label="Select Work Item" className="flex-1 overflow-y-auto p-3" ref={listScrollRef}>
