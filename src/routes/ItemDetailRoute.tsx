@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { IconTooltip } from '../components/IconTooltip';
+import { MasterDetailShell } from '../components/MasterDetailShell';
 import { useWorkItems } from '../hooks/useWorkItems';
 
 const itemRoute = getRouteApi('/items/$id');
@@ -75,88 +76,88 @@ export function ItemDetailRoute() {
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden">
-      {/* MASTER LIST */}
-      <section className="flex w-96 flex-col border-r border-slate-200 bg-white" aria-labelledby="list-heading">
-        <h2 id="list-heading" className="sr-only">Item Workspace List</h2>
+    <MasterDetailShell
+      masterListHeading="Item Workspace List"
+      detailKey={activeItem.id}
+      contextRailHeading="Contextual Tool Actions"
+      masterList={
+        <>
+          <header className="flex h-14 items-center justify-between gap-3 border-b border-slate-200 px-4 bg-slate-50">
+            <search className="flex-1">
+              <form onSubmit={(e) => e.preventDefault()} className="relative">
+                <Search className="absolute top-2.5 left-3 h-4 w-4 text-slate-400" />
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  placeholder="Filter items... (⌘K)"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white py-1.5 pr-3 pl-9 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </form>
+            </search>
 
-        <header className="flex h-14 items-center justify-between gap-3 border-b border-slate-200 px-4 bg-slate-50">
-          <search className="flex-1">
-            <form onSubmit={(e) => e.preventDefault()} className="relative">
-              <Search className="absolute top-2.5 left-3 h-4 w-4 text-slate-400" />
-              <input
-                ref={searchInputRef}
-                type="search"
-                placeholder="Filter items... (⌘K)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white py-1.5 pr-3 pl-9 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </form>
-          </search>
+            <IconTooltip label="Filters">
+              <button type="button" aria-label="Filters" className="rounded-md border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 transition-colors">
+                <SlidersHorizontal className="h-4 w-4" />
+              </button>
+            </IconTooltip>
+          </header>
 
-          <IconTooltip label="Filters">
-            <button type="button" aria-label="Filters" className="rounded-md border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 transition-colors">
-              <SlidersHorizontal className="h-4 w-4" />
-            </button>
-          </IconTooltip>
-        </header>
-
-        <nav aria-label="Select Work Item" className="flex-1 overflow-y-auto p-3" ref={listScrollRef}>
-          {filteredItems.length > 0 ? (
-            <ul className="relative" style={{ height: virtualizer.getTotalSize() }}>
-              {virtualizer.getVirtualItems().map((virtualRow) => {
-                const item = filteredItems[virtualRow.index];
-                const isActive = item.id === id;
-                return (
-                  <li
-                    key={item.id}
-                    ref={virtualizer.measureElement}
-                    data-index={virtualRow.index}
-                    className="absolute top-0 left-0 w-full pb-2"
-                    style={{ transform: `translateY(${virtualRow.start}px)` }}
-                  >
-                    <Link
-                      to="/items/$id"
-                      params={{ id: item.id }}
-                      preload="intent"
-                      aria-current={isActive ? 'page' : undefined}
-                      className="group relative flex flex-col items-start gap-1 rounded-lg border border-transparent bg-white p-4 text-left shadow-xs transition-all hover:border-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 aria-[current=page]:border-blue-500 aria-[current=page]:bg-blue-50/50 aria-[current=page]:shadow-none"
+          <nav aria-label="Select Work Item" className="flex-1 overflow-y-auto p-3" ref={listScrollRef}>
+            {filteredItems.length > 0 ? (
+              <ul className="relative" style={{ height: virtualizer.getTotalSize() }}>
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const item = filteredItems[virtualRow.index];
+                  const isActive = item.id === id;
+                  return (
+                    <li
+                      key={item.id}
+                      ref={virtualizer.measureElement}
+                      data-index={virtualRow.index}
+                      className="absolute top-0 left-0 w-full pb-2"
+                      style={{ transform: `translateY(${virtualRow.start}px)` }}
                     >
-                      <div className="flex w-full items-center justify-between gap-2">
-                        <h3 className="font-semibold text-sm text-slate-900 group-aria-[current=page]:text-blue-900">{item.title}</h3>
-                        <span className={`inline-flex items-center rounded-sm px-1.5 py-0.5 text-xxs font-medium border ${statusBadgeClass[item.status]}`}>
-                          {item.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.summary}</p>
-                      <time className="mt-1 text-xxs text-slate-400" dateTime={item.date}>{item.date}</time>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <div className="p-8 text-center text-sm text-slate-500">No items match criteria.</div>
-          )}
-        </nav>
-
-        <footer className="flex h-12 shrink-0 items-center justify-between border-t border-slate-200 px-4 bg-slate-50">
-          <nav aria-label="Pagination Navigation" className="flex w-full items-center justify-between text-xs text-slate-600 font-medium">
-            <button type="button" disabled aria-label="Previous Page" className="flex items-center gap-1 rounded border border-slate-200 bg-white px-2.5 py-1 opacity-50 cursor-not-allowed">
-              <ChevronLeft className="h-3.5 w-3.5" /> Prev
-            </button>
-            <span className="text-slate-500">Page 1 of 1</span>
-            <button type="button" disabled aria-label="Next Page" className="flex items-center gap-1 rounded border border-slate-200 bg-white px-2.5 py-1 opacity-50 cursor-not-allowed">
-              Next <ChevronRight className="h-3.5 w-3.5" />
-            </button>
+                      <Link
+                        to="/items/$id"
+                        params={{ id: item.id }}
+                        preload="intent"
+                        aria-current={isActive ? 'page' : undefined}
+                        className="group relative flex flex-col items-start gap-1 rounded-lg border border-transparent bg-white p-4 text-left shadow-xs transition-all hover:border-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 aria-[current=page]:border-blue-500 aria-[current=page]:bg-blue-50/50 aria-[current=page]:shadow-none"
+                      >
+                        <div className="flex w-full items-center justify-between gap-2">
+                          <h3 className="font-semibold text-sm text-slate-900 group-aria-[current=page]:text-blue-900">{item.title}</h3>
+                          <span className={`inline-flex items-center rounded-sm px-1.5 py-0.5 text-xxs font-medium border ${statusBadgeClass[item.status]}`}>
+                            {item.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.summary}</p>
+                        <time className="mt-1 text-xxs text-slate-400" dateTime={item.date}>{item.date}</time>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div className="p-8 text-center text-sm text-slate-500">No items match criteria.</div>
+            )}
           </nav>
-        </footer>
-      </section>
 
-      {/* DETAIL VIEW WITH CONTEXT RAIL SPLIT */}
-      <div className="flex flex-1 overflow-hidden bg-white">
-        <article key={activeItem.id} className="flex-1 overflow-y-auto p-8">
+          <footer className="flex h-12 shrink-0 items-center justify-between border-t border-slate-200 px-4 bg-slate-50">
+            <nav aria-label="Pagination Navigation" className="flex w-full items-center justify-between text-xs text-slate-600 font-medium">
+              <button type="button" disabled aria-label="Previous Page" className="flex items-center gap-1 rounded border border-slate-200 bg-white px-2.5 py-1 opacity-50 cursor-not-allowed">
+                <ChevronLeft className="h-3.5 w-3.5" /> Prev
+              </button>
+              <span className="text-slate-500">Page 1 of 1</span>
+              <button type="button" disabled aria-label="Next Page" className="flex items-center gap-1 rounded border border-slate-200 bg-white px-2.5 py-1 opacity-50 cursor-not-allowed">
+                Next <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </nav>
+          </footer>
+        </>
+      }
+      detail={
+        <>
           <header className="border-b border-slate-200 pb-6 mb-6">
             <nav aria-label="Breadcrumb" className="mb-2">
               <ol className="flex items-center gap-2 text-xs text-slate-400 font-mono uppercase tracking-wider">
@@ -179,10 +180,10 @@ export function ItemDetailRoute() {
             </p>
             <p>{activeItem.body}</p>
           </div>
-        </article>
-
-        <aside className="w-56 border-l border-slate-200 bg-slate-50/70 p-4 space-y-6" aria-labelledby="context-rail-heading">
-          <h2 id="context-rail-heading" className="sr-only">Contextual Tool Actions</h2>
+        </>
+      }
+      contextRail={
+        <>
           <section className="space-y-2">
             <h3 className="text-xxs font-bold uppercase tracking-widest text-slate-400">Context Actions</h3>
             <button type="button" className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
@@ -249,8 +250,8 @@ export function ItemDetailRoute() {
               </li>
             </ul>
           </section>
-        </aside>
-      </div>
-    </div>
+        </>
+      }
+    />
   );
 }
