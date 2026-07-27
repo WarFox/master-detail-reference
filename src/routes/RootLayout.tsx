@@ -17,15 +17,17 @@ export function RootLayout() {
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          <span
-            aria-disabled="true"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 cursor-not-allowed"
+          <button
+            type="button"
+            disabled
+            aria-label="Dashboard (coming soon)"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 disabled:cursor-not-allowed"
           >
             <LayoutDashboard className="h-4 w-4" /> Dashboard
-          </span>
+          </button>
           <Link
-            to="/"
-            aria-current={pathname === '/' ? 'page' : undefined}
+            to="/items"
+            aria-current={pathname.startsWith('/items') ? 'page' : undefined}
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white aria-[current=page]:bg-blue-600 aria-[current=page]:text-white"
           >
             <Layers className="h-4 w-4" /> Work Items
