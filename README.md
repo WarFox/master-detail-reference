@@ -16,6 +16,16 @@ Two routes, wired end to end: an **items index page** for browsing/triage, and a
 
 The record shape lives in `src/mockData.ts` (`WorkItem`); data is mocked, no backend.
 
+## Adding a new domain
+
+The master-list/detail/context-rail composition and its ARIA wiring live in `src/components/MasterDetailShell.tsx`, separate from anything `WorkItem`-specific. To add a second domain (e.g. `Customers`) alongside Work Items:
+
+1. Add route(s) mirroring `/items` and `/items/$id` to `router.tsx` (e.g. `/customers`, `/customers/$id`), each with a `loader` that calls `ensureQueryData`.
+2. Add a `useCustomers` hook next to `useWorkItems.ts`, same shape: `queryOptions` + a `useSuspenseQuery` wrapper.
+3. Add a `CustomersIndexRoute`, structurally identical to `ItemsIndexRoute.tsx` (a `<table>`), just with customer columns.
+4. Add a `CustomerDetailRoute` that renders `<MasterDetailShell masterListHeading=... masterList={...} detailKey={...} detail={...} contextRailHeading=... contextRail={...} />`, filling each slot with customer-specific markup — the shell already handles the section/article/aside shape and the heading/landmark wiring, so there's nothing ARIA-related left to get wrong by hand.
+5. `RootLayout`, `NotificationsPopover`, and `IconTooltip` need no changes — they're already domain-agnostic global chrome.
+
 ## Stack
 
 - [React 19](https://react.dev) + TypeScript
@@ -73,7 +83,9 @@ src/
     ItemsIndexRoute.tsx          # "/items" — table of items
     ItemDetailRoute.tsx          # "/items/:id" — master list + detail + context rail
   components/
+    MasterDetailShell.tsx        # reusable section/article/aside composition + ARIA wiring for any domain
     NotificationsPopover.tsx     # Base UI Popover-backed notification bell
+    IconTooltip.tsx              # shared Tooltip wrapper for icon-only buttons
   hooks/
     useWorkItems.ts              # shared query options + hook for the mock item list, used by both components and route loaders
   mockData.ts                    # WorkItem type + sample records
