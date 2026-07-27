@@ -2,29 +2,32 @@
 
 A small, readable reference implementation of the **master–detail** UI pattern, built with React 19, Base UI, TanStack Query, TanStack Router, and Tailwind CSS 4.
 
-Two routes, wired end to end: an **items index page** for browsing/triage, and an **`/items/:id` master-detail view** — a sidebar, a virtualized searchable master list, a detail view with a context rail, a toolbar with notifications, and a slide-over settings modal. Every interactive surface uses standard semantic HTML and ARIA (link lists, real `<table>`s, native dialog/popover/toast primitives) rather than repurposed widgets — that fidelity is the point of this reference.
+Two domains, each wired end to end the same way, to prove the pattern generalizes rather than being a one-off: **Work Items** (`/items`, `/items/:id`) and **Customers** (`/customers`, `/customers/:id`). Each domain gets an index page for browsing/triage and a master-detail view — a sidebar, a virtualized searchable master list, a detail view with a context rail, a toolbar with notifications, and a slide-over settings modal. Every interactive surface uses standard semantic HTML and ARIA (link lists, real `<table>`s, native dialog/popover/toast primitives) rather than repurposed widgets — that fidelity is the point of this reference.
 
 ## What it shows
 
-- **Sidebar** — persistent primary navigation (`src/routes/RootLayout.tsx`)
-- **Items index** (`/items`, with `/` redirecting to it) — a real `<table>` of all records; click a row to open its detail view (`src/routes/ItemsIndexRoute.tsx`)
-- **Master list** (`/items/:id`) — a virtualized, searchable `<nav>`/`<ul>` of links (`aria-current="page"` marks the open item), not a repurposed tab widget (`src/routes/ItemDetailRoute.tsx`)
-- **Detail view** — record detail with a contextual action rail (`aside`); detail scroll resets on navigation, master-list scroll position is preserved
+- **Sidebar** — persistent primary navigation with a link per domain (`src/routes/RootLayout.tsx`)
+- **Index pages** (`/items`, `/customers`, with `/` redirecting to `/items`) — a real `<table>` of all records per domain; click a row to open its detail view (`src/routes/ItemsIndexRoute.tsx`, `src/routes/CustomersIndexRoute.tsx`)
+- **Master list** (`/items/:id`, `/customers/:id`) — a virtualized, searchable `<nav>`/`<ul>` of links (`aria-current="page"` marks the open item), not a repurposed tab widget (`src/routes/ItemDetailRoute.tsx`, `src/routes/CustomerDetailRoute.tsx`)
+- **Detail view** — record detail with a contextual action rail (`aside`), built on the shared `MasterDetailShell`; detail scroll resets on navigation, master-list scroll position is preserved
 - **Toolbar** — search input with `⌘K`/`Ctrl+K` focus hotkey, plus a Base UI `Popover` for notifications
 - **Delete flow** — Base UI `Dialog` confirmation, then a Base UI `Toast` (no blocking `alert()`), redirecting back to the index
-- **Async data** — TanStack Query, prefetched via route `loader`s (`queryClient.ensureQueryData`) so both routes render with data already in cache, and `preload="intent"` on row links does real hover-prefetching
+- **Async data** — TanStack Query, prefetched via route `loader`s (`queryClient.ensureQueryData`) so every route renders with data already in cache, and `preload="intent"` on row links does real hover-prefetching
+- **Navigation feedback** — a router-level pending state (visible before the mock fetch's 800ms completes) and a not-found page, so a cross-domain navigation never looks like a dead click
 
-The record shape lives in `src/mockData.ts` (`WorkItem`); data is mocked, no backend.
+Record shapes live in `src/mockData.ts` (`WorkItem`) and `src/mockCustomers.ts` (`Customer`); data is mocked, no backend.
 
 ## Adding a new domain
 
-The master-list/detail/context-rail composition and its ARIA wiring live in `src/components/MasterDetailShell.tsx`, separate from anything `WorkItem`-specific. To add a second domain (e.g. `Customers`) alongside Work Items:
+The master-list/detail/context-rail composition and its ARIA wiring live in `src/components/MasterDetailShell.tsx`, separate from anything domain-specific. Customers was added as the second domain by following exactly this recipe:
 
-1. Add route(s) mirroring `/items` and `/items/$id` to `router.tsx` (e.g. `/customers`, `/customers/$id`), each with a `loader` that calls `ensureQueryData`.
-2. Add a `useCustomers` hook next to `useWorkItems.ts`, same shape: `queryOptions` + a `useSuspenseQuery` wrapper.
-3. Add a `CustomersIndexRoute`, structurally identical to `ItemsIndexRoute.tsx` (a `<table>`), just with customer columns.
-4. Add a `CustomerDetailRoute` that renders `<MasterDetailShell masterListHeading=... masterList={...} detailKey={...} detail={...} contextRailHeading=... contextRail={...} />`, filling each slot with customer-specific markup — the shell already handles the section/article/aside shape and the heading/landmark wiring, so there's nothing ARIA-related left to get wrong by hand.
-5. `RootLayout`, `NotificationsPopover`, and `IconTooltip` need no changes — they're already domain-agnostic global chrome.
+1. Route(s) mirroring `/items` and `/items/$id` added to `router.tsx` (`/customers`, `/customers/$id`), each with a `loader` that calls `ensureQueryData`.
+2. `useCustomers` hook next to `useWorkItems.ts`, same shape: `queryOptions` + a `useSuspenseQuery` wrapper.
+3. `CustomersIndexRoute`, structurally identical to `ItemsIndexRoute.tsx` (a `<table>`), just with customer columns.
+4. `CustomerDetailRoute` renders `<MasterDetailShell masterListHeading=... masterList={...} detailKey={...} detail={...} contextRailHeading=... contextRail={...} />`, filling each slot with customer-specific markup — the shell already handles the section/article/aside shape and the heading/landmark wiring, so there was nothing ARIA-related left to get wrong by hand.
+5. `RootLayout` only needed one addition: a "Customers" sidebar link. `NotificationsPopover` and `IconTooltip` needed no changes at all — they're domain-agnostic global chrome.
+
+Diff those four `Customer*`/`useCustomers` files against their `Item`/`useWorkItems` counterparts to see exactly what varies per domain (field names, table columns, status vocabulary, actions) versus what's identical boilerplate (loader shape, virtualization setup, delete→toast→redirect flow, ARIA structure).
 
 ## Stack
 
@@ -77,17 +80,21 @@ If you're using this as a reference for a rewrite in a different framework (e.g.
 
 ```
 src/
-  router.tsx                    # route tree + router instance
+  router.tsx                    # route tree + router instance, defaultPendingComponent/defaultNotFoundComponent
   routes/
     RootLayout.tsx               # sidebar + top bar + toast viewport + <Outlet />
-    ItemsIndexRoute.tsx          # "/items" — table of items
+    ItemsIndexRoute.tsx          # "/items" — table of work items
     ItemDetailRoute.tsx          # "/items/:id" — master list + detail + context rail
+    CustomersIndexRoute.tsx      # "/customers" — table of customers
+    CustomerDetailRoute.tsx      # "/customers/:id" — master list + detail + context rail
   components/
     MasterDetailShell.tsx        # reusable section/article/aside composition + ARIA wiring for any domain
     NotificationsPopover.tsx     # Base UI Popover-backed notification bell
     IconTooltip.tsx              # shared Tooltip wrapper for icon-only buttons
   hooks/
-    useWorkItems.ts              # shared query options + hook for the mock item list, used by both components and route loaders
+    useWorkItems.ts              # query options + hook for the mock item list, used by components and route loaders
+    useCustomers.ts              # same shape, for customers
   mockData.ts                    # WorkItem type + sample records
+  mockCustomers.ts                # Customer type + sample records
   main.tsx                       # QueryClientProvider + Toast.Provider + RouterProvider
 ```
