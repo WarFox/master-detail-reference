@@ -1,5 +1,6 @@
+import { useEffect, useRef } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useWorkItems } from '../hooks/useWorkItems';
 
 const statusBadgeClass: Record<string, string> = {
@@ -9,59 +10,61 @@ const statusBadgeClass: Record<string, string> = {
 };
 
 export function ItemsIndexRoute() {
-  const { data: items = [], isLoading } = useWorkItems();
+  const { data: items } = useWorkItems();
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // Move focus to the page heading on route entry so screen reader users
+  // get an announcement after a client-side navigation (e.g. post-delete redirect).
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-white">
       <header className="border-b border-slate-200 px-8 py-6">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Work Items</h1>
+        <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-bold tracking-tight text-slate-900 outline-none">
+          Work Items
+        </h1>
         <p className="text-sm text-slate-500 mt-1">Browse all items. Select one to open its detail view.</p>
       </header>
 
       <div className="flex-1 overflow-y-auto p-8">
-        {isLoading ? (
-          <div className="flex h-32 flex-col items-center justify-center gap-2 text-sm text-slate-500">
-            <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
-            <span>Streaming items...</span>
-          </div>
-        ) : (
-          <table className="w-full text-left text-sm border-collapse">
-            <caption className="sr-only">Work items</caption>
-            <thead>
-              <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                <th scope="col" aria-sort="none" className="py-2 pr-4 font-semibold">Title</th>
-                <th scope="col" aria-sort="none" className="py-2 pr-4 font-semibold">Status</th>
-                <th scope="col" aria-sort="none" className="py-2 pr-4 font-semibold">Author</th>
-                <th scope="col" aria-sort="none" className="py-2 pr-4 font-semibold">Date</th>
+        <table className="w-full text-left text-sm border-collapse">
+          <caption className="sr-only">Work items</caption>
+          <thead>
+            <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <th scope="col" className="py-2 pr-4 font-semibold">Title</th>
+              <th scope="col" className="py-2 pr-4 font-semibold">Status</th>
+              <th scope="col" className="py-2 pr-4 font-semibold">Author</th>
+              <th scope="col" className="py-2 pr-4 font-semibold">Date</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {items.map((item) => (
+              <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                <th scope="row" className="py-3 pr-4 font-semibold text-slate-900">
+                  <Link
+                    to="/items/$id"
+                    params={{ id: item.id }}
+                    preload="intent"
+                    className="hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded-sm"
+                  >
+                    {item.title}
+                  </Link>
+                </th>
+                <td className="py-3 pr-4">
+                  <span className={`inline-flex items-center rounded-sm px-1.5 py-0.5 text-xxs font-medium border ${statusBadgeClass[item.status]}`}>
+                    {item.status}
+                  </span>
+                </td>
+                <td className="py-3 pr-4 text-slate-600">{item.author}</td>
+                <td className="py-3 pr-4 text-slate-500">
+                  <time dateTime={item.date}>{item.date}</time>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {items.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                  <th scope="row" className="py-3 pr-4 font-semibold text-slate-900">
-                    <Link
-                      to="/items/$id"
-                      params={{ id: item.id }}
-                      preload="intent"
-                      className="hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded-sm"
-                    >
-                      {item.title}
-                    </Link>
-                  </th>
-                  <td className="py-3 pr-4">
-                    <span className={`inline-flex items-center rounded-sm px-1.5 py-0.5 text-xxs font-medium border ${statusBadgeClass[item.status]}`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="py-3 pr-4 text-slate-600">{item.author}</td>
-                  <td className="py-3 pr-4 text-slate-500">
-                    <time dateTime={item.date}>{item.date}</time>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <footer className="flex h-12 shrink-0 items-center justify-between border-t border-slate-200 px-8 bg-slate-50">
