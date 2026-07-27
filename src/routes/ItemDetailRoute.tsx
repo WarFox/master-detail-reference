@@ -42,7 +42,7 @@ export function ItemDetailRoute() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const { data: items = [] } = useWorkItems();
+  const { data: items } = useWorkItems();
 
   const filteredItems = items.filter(
     (item) =>
@@ -57,10 +57,11 @@ export function ItemDetailRoute() {
     getScrollElement: () => listScrollRef.current,
     estimateSize: () => 92,
     overscan: 8,
+    measureElement: (el) => el.getBoundingClientRect().height,
   });
 
   const handleDeleteConfirm = () => {
-    navigate({ to: '/' });
+    navigate({ to: '/items' });
     toastManager.add({
       title: 'Item deleted',
       description: activeItem ? `"${activeItem.title}" was deleted.` : undefined,
@@ -75,8 +76,8 @@ export function ItemDetailRoute() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* MASTER LIST */}
-      <section className="flex w-96 flex-col border-r border-slate-200 bg-white">
-        <h2 className="sr-only">Item Workspace List</h2>
+      <section className="flex w-96 flex-col border-r border-slate-200 bg-white" aria-labelledby="list-heading">
+        <h2 id="list-heading" className="sr-only">Item Workspace List</h2>
 
         <header className="flex h-14 items-center justify-between gap-3 border-b border-slate-200 px-4 bg-slate-50">
           <search className="flex-1">
@@ -98,27 +99,26 @@ export function ItemDetailRoute() {
           </button>
         </header>
 
-        <nav aria-label="Select Work Item" className="flex-1 overflow-y-auto" ref={listScrollRef}>
+        <nav aria-label="Select Work Item" className="flex-1 overflow-y-auto p-3" ref={listScrollRef}>
           {filteredItems.length > 0 ? (
-            <ul
-              className="relative p-3"
-              style={{ height: virtualizer.getTotalSize() }}
-            >
+            <ul className="relative" style={{ height: virtualizer.getTotalSize() }}>
               {virtualizer.getVirtualItems().map((virtualRow) => {
                 const item = filteredItems[virtualRow.index];
                 const isActive = item.id === id;
                 return (
                   <li
                     key={item.id}
-                    className="absolute top-0 left-0 w-full px-3"
-                    style={{ height: virtualRow.size, transform: `translateY(${virtualRow.start}px)` }}
+                    ref={virtualizer.measureElement}
+                    data-index={virtualRow.index}
+                    className="absolute top-0 left-0 w-full pb-2"
+                    style={{ transform: `translateY(${virtualRow.start}px)` }}
                   >
                     <Link
                       to="/items/$id"
                       params={{ id: item.id }}
                       preload="intent"
                       aria-current={isActive ? 'page' : undefined}
-                      className="group relative flex h-[calc(100%-0.5rem)] flex-col items-start gap-1 rounded-lg border border-transparent bg-white p-4 text-left shadow-xs transition-all hover:border-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 aria-[current=page]:border-blue-500 aria-[current=page]:bg-blue-50/50 aria-[current=page]:shadow-none"
+                      className="group relative flex flex-col items-start gap-1 rounded-lg border border-transparent bg-white p-4 text-left shadow-xs transition-all hover:border-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 aria-[current=page]:border-blue-500 aria-[current=page]:bg-blue-50/50 aria-[current=page]:shadow-none"
                     >
                       <div className="flex w-full items-center justify-between gap-2">
                         <h3 className="font-semibold text-sm text-slate-900 group-aria-[current=page]:text-blue-900">{item.title}</h3>
