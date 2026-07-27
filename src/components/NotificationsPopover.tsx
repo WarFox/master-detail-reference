@@ -18,12 +18,12 @@ export function NotificationsPopover() {
           render={
             <button
               type="button"
-              aria-label="View notifications"
+              aria-label={notifications.length > 0 ? `View notifications (${notifications.length} unread)` : 'View notifications'}
               className="relative rounded-md border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
             >
               <Bell className="h-4 w-4" />
               {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                <span aria-hidden="true" className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
                   {notifications.length}
                 </span>
               )}

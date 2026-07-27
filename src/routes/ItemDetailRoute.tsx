@@ -158,9 +158,15 @@ export function ItemDetailRoute() {
       <div className="flex flex-1 overflow-hidden bg-white">
         <article key={activeItem.id} className="flex-1 overflow-y-auto p-8">
           <header className="border-b border-slate-200 pb-6 mb-6">
-            <div className="flex items-center gap-2 text-xs text-slate-400 mb-2 font-mono uppercase tracking-wider">
-              <span>Workspace</span> / <span>Item View</span> / <span>{activeItem.id}</span>
-            </div>
+            <nav aria-label="Breadcrumb" className="mb-2">
+              <ol className="flex items-center gap-2 text-xs text-slate-400 font-mono uppercase tracking-wider">
+                <li>
+                  <Link to="/items" className="hover:text-slate-600 hover:underline">Work Items</Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page">{activeItem.id}</li>
+              </ol>
+            </nav>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-2">{activeItem.title}</h1>
             <p className="text-sm text-slate-500">
               Assigned Owner: <span className="font-semibold text-slate-700">{activeItem.author}</span> • Published <time dateTime={activeItem.date}>{activeItem.date}</time>
@@ -175,7 +181,8 @@ export function ItemDetailRoute() {
           </div>
         </article>
 
-        <aside className="w-56 border-l border-slate-200 bg-slate-50/70 p-4 space-y-6" aria-label="Contextual Tool Actions">
+        <aside className="w-56 border-l border-slate-200 bg-slate-50/70 p-4 space-y-6" aria-labelledby="context-rail-heading">
+          <h2 id="context-rail-heading" className="sr-only">Contextual Tool Actions</h2>
           <section className="space-y-2">
             <h3 className="text-xxs font-bold uppercase tracking-widest text-slate-400">Context Actions</h3>
             <button type="button" className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">

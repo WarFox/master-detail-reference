@@ -19,7 +19,7 @@ export function RootLayout() {
             </span>
           </div>
 
-          <nav className="flex-1 p-4 space-y-1">
+          <nav aria-label="Primary" className="flex-1 p-4 space-y-1">
             <button
               type="button"
               disabled
@@ -52,7 +52,7 @@ export function RootLayout() {
                 <Dialog.Backdrop className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-300" />
                 <Dialog.Popup
                   className="fixed top-0 right-0 z-50 h-screen w-96 border-l border-slate-200 bg-white p-6 shadow-2xl transition-transform duration-300 ease-in-out data-[state=closed]:translate-x-full"
-                  render={<section aria-label="System Settings Configuration Sheet" />}
+                  render={<section />}
                 >
                   <header className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
                     <div>
