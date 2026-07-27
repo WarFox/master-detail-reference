@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { mockItems, type WorkItem } from '../mockData';
 
 const fetchWorkItemsAsync = async (): Promise<WorkItem[]> => {
@@ -6,9 +6,11 @@ const fetchWorkItemsAsync = async (): Promise<WorkItem[]> => {
   return mockItems;
 };
 
+export const workItemsQueryOptions = queryOptions({
+  queryKey: ['workItems'],
+  queryFn: fetchWorkItemsAsync,
+});
+
 export function useWorkItems() {
-  return useQuery({
-    queryKey: ['workItems'],
-    queryFn: fetchWorkItemsAsync,
-  });
+  return useSuspenseQuery(workItemsQueryOptions);
 }
