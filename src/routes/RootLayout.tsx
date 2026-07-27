@@ -27,8 +27,8 @@ export function RootLayout() {
           </button>
           <Link
             to="/items"
-            aria-current={pathname.startsWith('/items') ? 'page' : undefined}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white aria-[current=page]:bg-blue-600 aria-[current=page]:text-white"
+            aria-current={pathname.startsWith('/items') ? 'true' : undefined}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white aria-[current=true]:bg-blue-600 aria-[current=true]:text-white"
           >
             <Layers className="h-4 w-4" /> Work Items
           </Link>
